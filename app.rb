@@ -4,14 +4,13 @@ require 'date'
 
 def latest(name)
   files = Dir["input/*#{name}*.txt"]
-  # puts files
-  # files.sort_by! do |file|
-  #   last_date = /\d+-\d+-\d+_[[:alpha:]]+\.txt$/.match file
-  #   last_date = last_date.to_s.match /\d+-\d+-\d+/
-  #   puts last_date
-  #   date = DateTime.parse(last_date.to_s)
-  #   date
-  # end
+
+  files.sort_by! do |file|
+    last_date = /\d+-\d+-\d+_[[:alpha:]]+\.txt$/.match file
+    last_date = /\d+-\d+-\d+/.match last_date.to_s
+    date = Date.parse(last_date.to_s, '%y-%m-%d')
+    date
+  end
 
   throw RuntimeError if files.empty?
 
@@ -63,13 +62,11 @@ class Modifier
         end
       end
     end
-
-    puts 'after merger'
     done = false
     file_index = 0
     file_name = output.gsub('.txt', '')
     while not done do
-      CSV.open(file_name + "_#{file_index}.txt", "wb", { :col_sep => "\t", :headers => :first_row, :row_sep => "\r\n" }) do |csv|
+      CSV.open(file_name + "_#{file_index}.txt", "wb", col_sep: "\t", headers: :first_row, row_sep: "\r\n") do |csv|
         headers_written = false
         line_count = 0
         while line_count < LINES_PER_FILE
@@ -114,13 +111,11 @@ class Modifier
   end
 
   def combine_values(hash)
-    puts 'hash'
-    puts hash
     LAST_VALUE_WINS.each do |key|
       hash[key] = hash[key].last
     end
     LAST_REAL_VALUE_WINS.each do |key|
-      hash[key] = hash[key].select {|v| not (v.nil? or v == 0 or v == '0' or v == '')}.last
+      hash[key] = hash[key].select {|v| !v.nil? && v != 0 && v != '0' && !v.empty?}.last
     end
     INT_VALUES.each do |key|
       hash[key] = hash[key][0].to_s
@@ -134,7 +129,6 @@ class Modifier
     ['Commission Value', 'ACCOUNT - Commission Value', 'CAMPAIGN - Commission Value', 'BRAND - Commission Value', 'BRAND+CATEGORY - Commission Value', 'ADGROUP - Commission Value', 'KEYWORD - Commission Value'].each do |key|
       hash[key] = (@cancellation_factor * @saleamount_factor * hash[key][0].from_german_to_f).to_german_s
     end
-    puts hash
     hash
   end
 
