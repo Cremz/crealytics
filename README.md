@@ -10,3 +10,4 @@ You now have an enumerator with as many elements as there are lines in the CSV.
 Then, for each of the elements in the enumerator, you output it into the destination CSV, making sure you divide the total rows using the LINES_PER_FILE value.
 You used the combine_values method to change some of the values depending on calculations needed by the business logic.
 
+I added my own file, app.rb with the changes while leaving the modifier.rb file intact. There are not many changes as I believe the current code is working pretty okay for what I understood it has to do.
